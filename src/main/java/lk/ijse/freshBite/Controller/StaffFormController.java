@@ -12,7 +12,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import lk.ijse.freshBite.Model.StaffDetailModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.StaffDetailBo;
+import lk.ijse.freshBite.bo.custom.impl.StaffDetailBoImpl;
 import lk.ijse.freshBite.dto.StaffDetailDto;
 import lk.ijse.freshBite.dto.tm.StaffTm;
 
@@ -57,7 +59,7 @@ public class StaffFormController {
 
     @FXML
     private TableColumn<?, ?> telephoneCol;
-    private StaffDetailModel model = new StaffDetailModel();
+    private StaffDetailBo staffDetailBo = (StaffDetailBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.STAFF);
 
     public   void initialize(){
         setCellValueFactory();
@@ -72,7 +74,7 @@ public class StaffFormController {
     private void loadAllEmployees() {
         ObservableList<StaffTm> oblist = FXCollections.observableArrayList();
         try {
-            List<StaffDetailDto> dtoList = model.loadEmployees();
+            List<StaffDetailDto> dtoList = staffDetailBo.loadEmployees();
             for (StaffDetailDto dto : dtoList){
                 oblist.add(new StaffTm(
                         dto.getEmpId(),

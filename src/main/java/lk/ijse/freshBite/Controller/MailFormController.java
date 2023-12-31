@@ -10,7 +10,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import lk.ijse.freshBite.Model.CustomerDetailModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.MailBo;
+import lk.ijse.freshBite.bo.custom.impl.MailBoImpl;
 import lk.ijse.freshBite.email.SendEmail;
 
 import javax.mail.MessagingException;
@@ -35,7 +37,7 @@ public class MailFormController {
     private TextField lblText;
 
     private List<File> attachedFiles = new ArrayList<>();
-    private CustomerDetailModel customerDetailModel = new CustomerDetailModel();
+   private MailBo mailBo = (MailBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.MAIL);
     public void initialize(){
        // btnSend.setDisable(true);
         setImageToBtn();
@@ -46,7 +48,7 @@ public class MailFormController {
     @FXML
     void btnSendOnAction(ActionEvent event) throws MessagingException {
         try {
-            List<String> emailList = customerDetailModel.getCustomerEmails();
+            List<String> emailList = mailBo.getCustomerEmails();
            // System.out.println(emailList);
             String subject = lblSubject.getText();
             String text = txtAreaText.getText();

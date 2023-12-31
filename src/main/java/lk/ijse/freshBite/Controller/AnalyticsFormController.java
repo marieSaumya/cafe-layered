@@ -12,10 +12,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import lk.ijse.freshBite.Model.AnalyticsModel;
-import lk.ijse.freshBite.Model.CustomerDetailModel;
-import lk.ijse.freshBite.Model.OrderItemModel;
-import lk.ijse.freshBite.Model.OrderModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.AnalyticsBo;
+import lk.ijse.freshBite.bo.custom.impl.AnalyticsBoImpl;
 import lk.ijse.freshBite.dto.AnalyticsDto;
 import lk.ijse.freshBite.dto.ExpenseDataDto;
 import lk.ijse.freshBite.dto.SalesDataDto;
@@ -58,10 +57,7 @@ public class AnalyticsFormController {
 
     @FXML
     private TableView<TrendingItemTm> tableTrendingItem;
-    private AnalyticsModel model = new AnalyticsModel();
-    private CustomerDetailModel customerDetailModel = new CustomerDetailModel();
-    private OrderModel orderModel = new OrderModel();
-    private OrderItemModel orderItemModel = new OrderItemModel();
+    private AnalyticsBo analyticsBo = (AnalyticsBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.ANALYTICS);
 
     public void initialize(){
         setCombValues();
@@ -82,12 +78,12 @@ public class AnalyticsFormController {
     @FXML
     void btnSalesReportOnAction(ActionEvent event) {
         try {
-            Double totalRevenue = orderModel.getTotalRevenue();
-            int soldUnits = orderItemModel.getSoldUnits();
+            Double totalRevenue = analyticsBo.getTotalRevenue();
+            int soldUnits = analyticsBo.getSoldUnits();
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("totalRevenue",totalRevenue);
             parameters.put("totalSoldUnits",soldUnits);
-            List<SalesDataDto> salesData = model.getSalesData();
+            List<SalesDataDto> salesData = analyticsBo.getSalesData();
             getReport(salesData,parameters);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -144,7 +140,7 @@ public class AnalyticsFormController {
             case "Daily":
                 // Fetch daily expenses data
                 try {
-                    expenseDataList = model.getDailyChartData();
+                    expenseDataList = analyticsBo.getDailyChartData();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
@@ -153,7 +149,7 @@ public class AnalyticsFormController {
             case "Weekly":
                 // Fetch weekly expenses data
                 try {
-                    expenseDataList = model.getWeeklyChartData();
+                    expenseDataList = analyticsBo.getWeeklyChartData();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
@@ -161,7 +157,7 @@ public class AnalyticsFormController {
             case "Monthly":
                 // Fetch monthly expenses data
                 try {
-                    expenseDataList = model.getMonthluChartData();
+                    expenseDataList = analyticsBo.getMonthluChartData();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
@@ -179,7 +175,7 @@ public class AnalyticsFormController {
 
     private void getCustomerDetails(){
         try {
-            List<AnalyticsDto> locationDataList = customerDetailModel.getCustomerLocationData();
+            List<AnalyticsDto> locationDataList = analyticsBo.getCustomerLocationData();
             updateBarChart(locationDataList);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -200,7 +196,7 @@ public class AnalyticsFormController {
     private void  setTableReservation(){
         ObservableList<TrendingItemTm> trendingItemTmList = FXCollections.observableArrayList();
         try {
-            List<TrendingItemDto> dtoList = OrderModel.getTrendingItems();
+            List<TrendingItemDto> dtoList = analyticsBo.getTrendingItems();
             for (TrendingItemDto dto : dtoList){
                 ImageView imageView = new ImageView();
                 Image image = new Image(dto.getImagePath());

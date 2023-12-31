@@ -13,7 +13,7 @@ public class DbConnection {
         connection = DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/freshBiteCafe",
                 "root",
-                "Ijse@1234");
+                "Marie@1996");
     }
 
     public  static  DbConnection getInstance() throws SQLException {

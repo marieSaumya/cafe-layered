@@ -11,9 +11,11 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
-import lk.ijse.freshBite.Model.StockItemModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.StockItemBo;
+import lk.ijse.freshBite.bo.custom.impl.StockItemBoImpl;
 import lk.ijse.freshBite.db.DbConnection;
-import lk.ijse.freshBite.dto.StockItemDto;
+import lk.ijse.freshBite.dto.StockDto;
 import lk.ijse.freshBite.dto.tm.StockItemTm;
 import lk.ijse.freshBite.regex.RegexPattern;
 import net.sf.jasperreports.engine.*;
@@ -24,6 +26,7 @@ import net.sf.jasperreports.view.JasperViewer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -78,12 +81,12 @@ public class StockItemFormController {
 
     @FXML
     private TextField txtStockId;
-    private StockItemModel model = new StockItemModel();
+    private StockItemBo stockItemBo = (StockItemBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.STOCK_ITEM);
     public void  initialize()  {
         ObservableList<String> supIdList = FXCollections.observableArrayList();
         List<String> list = null;
         try {
-            list = model.getSupIdList();
+            list = stockItemBo.getSupIdList();
             for (String id : list){
                 supIdList.add(id);
             }
@@ -117,8 +120,8 @@ public class StockItemFormController {
     private void loadAllItems() {
         ObservableList<StockItemTm> oblist = FXCollections.observableArrayList();
         try {
-            List<StockItemDto> dtoList = model.loadItems();
-            for (StockItemDto dto : dtoList){
+            List<StockDto> dtoList = stockItemBo.loadItems();
+            for (StockDto dto : dtoList){
                 oblist.add(new StockItemTm(dto.getStockId() ,
                         dto.getName(),
                         dto.getQuantity(),
@@ -157,9 +160,9 @@ public class StockItemFormController {
             int quantity = Integer.parseInt(txtQuantity.getText());
             double price = Double.parseDouble(txtPrice.getText());
             String sup_id = (String) combSupId.getValue();
-            var dto = new StockItemDto(stockId, name, quantity, price, sup_id);
+            var dto= new StockDto(stockId,name,quantity,price,sup_id,LocalDate.now());
             try {
-                boolean isAdd = model.addItems(dto);
+                boolean isAdd = stockItemBo.addItems(dto);
                 if (isAdd) {
                     new Alert(Alert.AlertType.CONFIRMATION, "Item add Successful");
                     tableStockItem.refresh();
@@ -173,7 +176,7 @@ public class StockItemFormController {
     }
     public void generateNextStockId(){
         try {
-            String nextId = model.getNextStockId();
+            String nextId = stockItemBo.getNextStockId();
             txtStockId.setText(nextId);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -202,7 +205,7 @@ public class StockItemFormController {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == yesButton) {
             try {
-                boolean isDeleted = model.deleteItem(stock_id);
+                boolean isDeleted = stockItemBo.deleteItem(stock_id);
                 if (isDeleted){
                     new Alert(Alert.AlertType.CONFIRMATION,"Item Deleted Successfully!!");
                     tableStockItem.refresh();
@@ -224,10 +227,10 @@ public class StockItemFormController {
             int quantity = Integer.parseInt(txtQuantity.getText());
             double price = Double.parseDouble(txtPrice.getText());
             String sup_id = (String) combSupId.getValue();
-            var dto = new StockItemDto(stockId, name, quantity, price, sup_id);
+            var dto = new StockDto(stockId, name, quantity, price, sup_id,LocalDate.now());
             boolean isUpdated = false;
             try {
-                isUpdated = model.updateItems(dto);
+                isUpdated = stockItemBo.updateItems(dto);
 
                 if (isUpdated) {
                     new Alert(Alert.AlertType.CONFIRMATION, "Item Information Updated").show();

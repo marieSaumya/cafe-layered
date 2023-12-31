@@ -10,7 +10,9 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import lk.ijse.freshBite.Model.ItemCardModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.ItemCardBo;
+import lk.ijse.freshBite.bo.custom.impl.ItemCardBoImpl;
 import lk.ijse.freshBite.dto.AddMenuDto;
 import lk.ijse.freshBite.dto.ItemCardDto;
 
@@ -46,7 +48,7 @@ public class ItemFormController {
     private AddMenuDto dto;
     private SpinnerValueFactory<Integer> spin;
     private  int qty;
-    private ItemCardModel model = new ItemCardModel();
+    private ItemCardBo itemCardBo = (ItemCardBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.ITEM_CARD);
     private MenuItemFormController menuItemFormController ;
     private List<ItemCardDto> cartItems = new ArrayList<>();
 
@@ -79,14 +81,14 @@ public class ItemFormController {
     void btnAddOnAction(ActionEvent event) {
          qty = spinnerQuantity.getValue();
         try {
-            String checkAvailability = model.getStatus(lblName.getText());
+            String checkAvailability = itemCardBo.getStatus(lblName.getText());
             if (checkAvailability.equals("Unavailable")) {
                 new Alert(Alert.AlertType.ERROR, lblName.getText() + " is not available in stock").show();
             } else if (qty == 0) {
                 new Alert(Alert.AlertType.ERROR, "Please Enter the quantity").show();
             } else {
                 String name = lblName.getText();
-                AddMenuDto dto = model.getItemDetails(name);
+                AddMenuDto dto = itemCardBo.getItemDetails(name);
                 System.out.println(dto);
                 // Add the item to the cart
                 cartItems.add(new ItemCardDto(dto, qty));
@@ -107,7 +109,7 @@ public class ItemFormController {
     void checkAvailabillity(){
 
         try {
-            String checkAvailability = model.getStatus(lblName.getText());
+            String checkAvailability = itemCardBo.getStatus(lblName.getText());
             System.out.println(lblName.getText());
             System.out.println(checkAvailability);
             if (checkAvailability.equals("Unavailable")) {

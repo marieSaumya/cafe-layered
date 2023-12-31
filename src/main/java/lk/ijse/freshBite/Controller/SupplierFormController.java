@@ -10,11 +10,14 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import lk.ijse.freshBite.Model.SupplierModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.SupplierBo;
+import lk.ijse.freshBite.bo.custom.impl.SupplierBoImpl;
 import lk.ijse.freshBite.dto.SupplierDto;
 import lk.ijse.freshBite.dto.tm.SupplierTm;
 import lk.ijse.freshBite.regex.RegexPattern;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -57,7 +60,7 @@ public class SupplierFormController {
 
     @FXML
     private TextField txtTelephone;
-    private SupplierModel supplierModel = new SupplierModel();
+   private SupplierBo supplierBo = (SupplierBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.SUPPLIER);
 
     public void initialize(){
       setCellValueFactory();
@@ -84,7 +87,7 @@ public class SupplierFormController {
     private void loadAllSuppliers() {
         ObservableList<SupplierTm> obList= FXCollections.observableArrayList();
         try {
-            List <SupplierDto> dtoList = supplierModel.loadSupplier();
+            List <SupplierDto> dtoList = supplierBo.loadSupplier();
             for(SupplierDto dto : dtoList){
                 obList.add(new SupplierTm(dto.getSup_id(),
                         dto.getName(),
@@ -125,7 +128,7 @@ public class SupplierFormController {
             }
             try {
                 if (dto != null) {
-                    boolean isSave = supplierModel.addSupplier(dto);
+                    boolean isSave = supplierBo.addSupplier(dto);
                     if (isSave) {
                         new Alert(Alert.AlertType.CONFIRMATION, "Supplier Saved!!").show();
                         clear();
@@ -134,6 +137,8 @@ public class SupplierFormController {
             } catch (SQLException e) {
 
                 new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
 
@@ -155,7 +160,7 @@ public class SupplierFormController {
             String telephone = txtTelephone.getText();
             String email = txtEmail.getText();
             try {
-                boolean isUpdated = supplierModel.updateSupplier(new SupplierDto(sup_id, name, Address, telephone, email));
+                boolean isUpdated = supplierBo.updateSupplier(new SupplierDto(sup_id, name, Address, telephone, email));
                 if (isUpdated) {
                     new Alert(Alert.AlertType.CONFIRMATION, "Supplier data updated!!").show();
                 }
@@ -170,7 +175,7 @@ public class SupplierFormController {
     public void btnDeleteOnAction(ActionEvent actionEvent) {
         String sup_id = txtSupplierId.getText();
         try {
-            boolean isDeleted = supplierModel.deleteSupplier(sup_id);
+            boolean isDeleted = supplierBo.deleteSupplier(sup_id);
             if (isDeleted){
                 new Alert(Alert.AlertType.CONFIRMATION,"Supplier Deleted !!").show();
             }

@@ -15,7 +15,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import lk.ijse.freshBite.Model.MenueItemModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.MenuItemBo;
+import lk.ijse.freshBite.bo.custom.impl.MenuItemBoImpl;
 import lk.ijse.freshBite.dto.AddMenuDto;
 import lk.ijse.freshBite.dto.MenuItemDto;
 import lk.ijse.freshBite.dto.tm.ItemCardTm;
@@ -103,7 +105,8 @@ public class MenuItemFormController {
 
     @FXML
     private TableView<ItemCardTm> tableAddCart;
-    private MenueItemModel model = new MenueItemModel();
+
+    private MenuItemBo menuItemBo = (MenuItemBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.MENU_ITEM);
     private  ItemFormController itemFormController;
     private ObservableList<ItemCardTm> cartItems = FXCollections.observableArrayList();
    private ObservableList<AddMenuDto> menuList = FXCollections.observableArrayList();
@@ -112,7 +115,6 @@ public class MenuItemFormController {
      loadCustId();
      displayDate();
      generateNextOrderId();
-
 
     }
 
@@ -123,7 +125,7 @@ public class MenuItemFormController {
     private void loadCustId()  {
         ObservableList<String> custList = FXCollections.observableArrayList();
         try {
-            List<String> list = model.getAllCustId();
+            List<String> list = menuItemBo.getAllCustId();
             for (String id : list){
                 custList.add(id);
             }
@@ -147,7 +149,7 @@ public class MenuItemFormController {
        // System.out.println("Place order form controller: " + itemList);
         var dto = new MenuItemDto(orderId,date,cust_id,total,itemList);
         try {
-            boolean isSuccess = model.placeOrder(dto);
+            boolean isSuccess = menuItemBo.placeOrder(dto);
             if (isSuccess){
                 new Alert(Alert.AlertType.CONFIRMATION,"Orders Save Successfully").show();;
             }
@@ -209,7 +211,7 @@ public class MenuItemFormController {
     }
     public List<AddMenuDto> getMenuData(){
         try {
-            List<AddMenuDto> dtoList = model.getAllMenuItems();
+            List<AddMenuDto> dtoList = menuItemBo.getAllMenuItems();
             for (AddMenuDto dto : dtoList){
                 System.out.println(dto);
             }
@@ -249,7 +251,7 @@ public class MenuItemFormController {
     public void SetNameOnAction(ActionEvent actionEvent) {
         String id = combCustId.getValue();
         try {
-            String name = model.getName(id);
+            String name = menuItemBo.getName(id);
             if(name!= null){
                 lblName.setText(name);
             }
@@ -266,7 +268,7 @@ public class MenuItemFormController {
     }
     private void generateNextOrderId(){
         try {
-            String orderId = model.genarateId();
+            String orderId = menuItemBo.generateOrderId();
             lblOrderId.setText(orderId);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -343,7 +345,7 @@ public class MenuItemFormController {
         String id = combCustId.getValue();
         double discount = 0;
         try {
-            String membership = model.getMembership(id);
+            String membership = menuItemBo.getMembership(id);
            switch (membership){
                case "Bronze" : {discount = total*0.05;}
                break;

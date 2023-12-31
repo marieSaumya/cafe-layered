@@ -7,7 +7,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
-import lk.ijse.freshBite.Model.ProfileModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.ProfileBo;
+import lk.ijse.freshBite.bo.custom.impl.ProfileBoImpl;
 import lk.ijse.freshBite.dto.ProfileDto;
 
 import java.sql.SQLException;
@@ -40,14 +42,14 @@ public class ProfileFormController {
 
     @FXML
     private TextField txtphone;
-    private ProfileModel profileModel = new ProfileModel();
+    private ProfileBo profileBo = (ProfileBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.PROFILE);
     public void initialize(){
         loadUserData();
     }
 
     private void loadUserData() {
         try {
-            ProfileDto dto = (ProfileDto) profileModel.getUserData();
+            ProfileDto dto = (ProfileDto) profileBo.getUserData();
             if (dto!=null){
                 setData(dto);
             }
@@ -82,7 +84,7 @@ public class ProfileFormController {
        String  phoneNo = txtphone.getText();
        var dto = new  ProfileDto(userName,pw,mail,phoneNo,address);
         try {
-            boolean isUpdate = profileModel.updateUser(dto);
+            boolean isUpdate = profileBo.updateUser(dto);
             if (isUpdate){
                 new Alert(Alert.AlertType.INFORMATION,"User Data Updated");
             }

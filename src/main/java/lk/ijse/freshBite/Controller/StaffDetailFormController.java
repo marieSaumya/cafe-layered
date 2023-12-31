@@ -15,15 +15,15 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import lk.ijse.freshBite.Model.StaffDetailModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.StaffDetailBo;
+import lk.ijse.freshBite.bo.custom.impl.StaffDetailBoImpl;
 import lk.ijse.freshBite.dto.StaffDetailDto;
 import lk.ijse.freshBite.dto.tm.StaffTm;
 import lk.ijse.freshBite.regex.RegexPattern;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
@@ -66,7 +66,7 @@ public class StaffDetailFormController {
 
     @FXML
     public TextField txtTelephone;
-    private StaffDetailModel model = new StaffDetailModel();
+    private StaffDetailBo staffDetailBo = (StaffDetailBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.STAFF);
     public void initialize(){
         generateNextId();
     }
@@ -81,7 +81,7 @@ public class StaffDetailFormController {
     void btnDeleteOnAction(ActionEvent event) {
         String emp_id = txtEmpId.getText();
         try {
-            boolean isDeleted = model.deleteEmployee(emp_id);
+            boolean isDeleted = staffDetailBo.deleteEmployee(emp_id);
             if (isDeleted){
                 new Alert(Alert.AlertType.CONFIRMATION,"Employee Deleted").show();
             }
@@ -107,12 +107,14 @@ public class StaffDetailFormController {
             String qualification = txtQualification.getText();
             var dto = new StaffDetailDto(emp_id, name, address, nic, telephone, email, jobRll, chargePerHour, qualification,barcodeData);
             try {
-                boolean isSaved = model.addEmployee(dto);
+                boolean isSaved = staffDetailBo.addEmployee(dto);
                 if (isSaved) {
                     new Alert(Alert.AlertType.CONFIRMATION, "Employee saved !!").show();
                 }
             } catch (SQLException e) {
                 new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
             clearFields();
         }
@@ -162,7 +164,7 @@ public class StaffDetailFormController {
             String qualification = txtQualification.getText();
             var dto = new StaffDetailDto(emp_id, name, address, nic, telephone, email, jobRll, chargePerHour, qualification);
             try {
-                boolean isUpdated = model.updateEmployee(dto);
+                boolean isUpdated = staffDetailBo.updateEmployee(dto);
                 if (isUpdated) {
                     new Alert(Alert.AlertType.CONFIRMATION, "Employee Data Updated !!").show();
                 }
@@ -198,7 +200,7 @@ public class StaffDetailFormController {
         txtQualification.setText(selectedData.getQualification());
         txtTelephone.setText(selectedData.getTelephone());
         try {
-            String path = model.getBarcodePath(txtEmpId.getText());
+            String path = staffDetailBo.getBarcodePath(txtEmpId.getText());
             if (path != null) {
                 File file = new File(path);
                 String uriString = file.toURI().toString();
@@ -239,7 +241,7 @@ public class StaffDetailFormController {
     }
     public  void generateNextId(){
         try {
-            String nextId = model.generateEmpId();
+            String nextId = staffDetailBo.generateEmpId();
             txtEmpId.setText(nextId);
         } catch (SQLException e) {
             throw new RuntimeException(e);

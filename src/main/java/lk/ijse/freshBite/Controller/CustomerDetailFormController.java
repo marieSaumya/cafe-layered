@@ -7,19 +7,20 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import lk.ijse.freshBite.Model.CustomerDetailModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.CustomerBo;
+import lk.ijse.freshBite.bo.custom.impl.CustomerBoImpl;
 import lk.ijse.freshBite.dto.CustomerDetailDto;
 import lk.ijse.freshBite.dto.tm.CustomerTm;
 import lk.ijse.freshBite.regex.RegexPattern;
 
-import java.awt.*;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,7 +85,8 @@ public class CustomerDetailFormController {
 
     @FXML
     private TextField txtTelephone;
-    private CustomerDetailModel model = new CustomerDetailModel();
+
+    private CustomerBo customerBo = (CustomerBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.CUSTOMER);
     Map<String, Double> newDiscounts = new HashMap<>();
 
 
@@ -97,7 +99,7 @@ public class CustomerDetailFormController {
     void btnDeleteOnAction(ActionEvent event) {
         String id = txtCustId.getText();
         try {
-            boolean isUpdated = model.deleteCustomer(id);
+            boolean isUpdated = customerBo.deleteCustomer(id);
             if (isUpdated){
                 new Alert(Alert.AlertType.CONFIRMATION,"Customer Deleted!!");
             }
@@ -119,12 +121,14 @@ public class CustomerDetailFormController {
             // lblMembership.setText(membership);
             var customerDetailDto = new CustomerDetailDto(id, name, address, tele, email, gender, membership);
             try {
-                boolean isSaved = model.saveCustomer(customerDetailDto);
+                boolean isSaved = customerBo.saveCustomer(customerDetailDto);
                 if (isSaved) {
                     new Alert(Alert.AlertType.CONFIRMATION, "Customer Saved Successfully").show();
                 }
             } catch (SQLException e) {
                 new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
             clearFields();
         }
@@ -143,7 +147,7 @@ public class CustomerDetailFormController {
             String membership = handleComboBox();
             var customerDetailDto = new CustomerDetailDto(id, name, address, tele, email, gender, membership);
             try {
-                boolean isUpdated = model.updateCustomer(customerDetailDto);
+                boolean isUpdated = customerBo.updateCustomer(customerDetailDto);
                 if (isUpdated) {
                     new Alert(Alert.AlertType.CONFIRMATION, "Customer updated!!").show();
                 }
@@ -294,7 +298,7 @@ public class CustomerDetailFormController {
     }
     public void generateNextCustomerId(){
         try {
-            String nextId = model.generateCustomerId();
+            String nextId = customerBo.generateCustomerId();
             txtCustId.setText(nextId);
         } catch (SQLException e) {
             throw new RuntimeException(e);

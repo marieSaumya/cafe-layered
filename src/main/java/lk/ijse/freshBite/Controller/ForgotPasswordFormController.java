@@ -9,12 +9,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import lk.ijse.freshBite.Model.ForgotPassword;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.ForgotPwBo;
+import lk.ijse.freshBite.bo.custom.impl.ForgotPwBoImpl;
 import lk.ijse.freshBite.dto.ForgotPassworddto;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ForgotPasswordFormController {
@@ -26,21 +27,19 @@ public class ForgotPasswordFormController {
     public Label lblAlert2;
     public AnchorPane root;
 
-    private ForgotPassword model = new ForgotPassword();
-
-
+    private ForgotPwBo forgotPwBo = (ForgotPwBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.PASSWORD);
     public void btnResetPasswordOnAction(ActionEvent actionEvent) {
         lblAlert1.setVisible(false);
         lblAlert2.setVisible(false);
       String userName = txtUserName.getText();
         try {
-            var dto = model.checkUserName();
+            var dto = forgotPwBo.checkUserName();
             if (dto.getUserName().equals(userName)){
                String pw = txtPwd.getText();
 
                if(pw.length()==8 && validation(pw)) {
                    var dto1 = new ForgotPassworddto(userName, pw);
-                   boolean isSet = model.setPassword(dto1);
+                   boolean isSet = forgotPwBo.setPassword(dto1);
                    if (isSet) {
                        new Alert(Alert.AlertType.CONFIRMATION, "Password Reset successful!!").show();
 

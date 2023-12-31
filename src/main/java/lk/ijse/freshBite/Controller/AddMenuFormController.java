@@ -11,18 +11,18 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
-import lk.ijse.freshBite.Model.AddMenuModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.AddMenuBo;
+import lk.ijse.freshBite.bo.custom.impl.AddMenuBoImpl;
 import lk.ijse.freshBite.dto.AddMenuDto;
 import lk.ijse.freshBite.dto.StockItemDto;
 import lk.ijse.freshBite.dto.tm.MenuTm;
 import lk.ijse.freshBite.regex.RegexPattern;
-import javafx.scene.control.TableCell;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -96,13 +96,13 @@ public class AddMenuFormController {
 
     @FXML
     private TableColumn<?, ?> typeCol;
-    private AddMenuModel model = new AddMenuModel();
+    private AddMenuBo addMenu = (AddMenuBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.ADD_MENU);
   private   ObservableList<MenuTm> oblist = FXCollections.observableArrayList();
     public void initialize() throws SQLException {
         ObservableList<String> statusList = FXCollections.observableArrayList("Available","Unavailable");
         cmbStatus.setItems(statusList);
         ObservableList<String> idList = FXCollections.observableArrayList();
-        List<String> id = model.getStockId();
+        List<String> id = addMenu.getStockId();
         for (String id1 :id ){
             idList.add(id1);
         }
@@ -133,7 +133,7 @@ public class AddMenuFormController {
         cmbId.setValue(newValue.getStock_id());
         cmbStatus.setValue(newValue.getStatus());
         TxtType.setText(newValue.getType());
-        Image image = model.getImgPath(newValue.getItem_id());
+        Image image = addMenu.getImgPath(newValue.getItem_id());
         if (image != null) {
             img.setImage(image);
         } else {
@@ -146,7 +146,7 @@ public class AddMenuFormController {
     private void loadAllMenues() {
 
         try {
-            List<AddMenuDto> dtoList = model.loadMenuItems();
+            List<AddMenuDto> dtoList = addMenu.loadMenuItems();
             for (AddMenuDto dto : dtoList){
                 oblist.add(new MenuTm(dto.getItemId(), dto.getName(), dto.getType(), dto.getQtyOnhand(), dto.getSellPrice(), dto.getStatus(), dto.getStockId()));
             }
@@ -183,7 +183,7 @@ public class AddMenuFormController {
 
             var dto = new AddMenuDto(itemId, name, type, qtyOnhand, price, status, stockId, imagePath);
             try {
-                boolean isAdd = model.addMenu(dto);
+                boolean isAdd = addMenu.addMenu(dto);
                 if (isAdd) {
                     new Alert(Alert.AlertType.CONFIRMATION, "Menu Item Add Successful!!").show();
                     loadAllMenues();
@@ -221,7 +221,7 @@ public class AddMenuFormController {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == yesButton) {
             try {
-                boolean isDeleted = model.deleteItem(menu_id);
+                boolean isDeleted = addMenu.deleteItem(menu_id);
                 if (isDeleted){
                     new Alert(Alert.AlertType.CONFIRMATION,"Item Deleted Successfully!!");
                     loadAllMenues();
@@ -271,7 +271,7 @@ public class AddMenuFormController {
 
             var dto = new AddMenuDto(itemId, name, type, qtyOnhand, price, status, stockId, path);
             try {
-                boolean isUpdate = model.updateMenu(dto);
+                boolean isUpdate = addMenu.updateMenu(dto);
                 if (isUpdate) {
                     new Alert(Alert.AlertType.CONFIRMATION, "Menu Updated!!").show();
                     loadAllMenues();
@@ -298,7 +298,7 @@ public class AddMenuFormController {
     public void setOnAction(ActionEvent actionEvent) {
         String stockId = String.valueOf(cmbId.getValue());
         try {
-            StockItemDto itemDto = model.getItemDetail(stockId);
+            StockItemDto itemDto = addMenu.getItemDetail(stockId);
            // txtStock.setText(String.valueOf(itemDto.getQuantity()));
             txtName.setText(itemDto.getName());
         } catch (SQLException e) {
@@ -331,12 +331,12 @@ public class AddMenuFormController {
 
             for (MenuTm item : oblist) {
                 if (item.getQty() == 0) {
-                    boolean isUpdate = model.updateStatus(item.getItem_id());
+                    boolean isUpdate = addMenu.updateStatus(item.getItem_id());
                     if (isUpdate) {
                         itemsToUpdate.add(item);
                     }
                 } else if (item.getQty() > 0 && item.getStatus().equals("Unavailable")) {
-                    boolean isUpdate = model.updateStatusAvailable(item.getItem_id());
+                    boolean isUpdate = addMenu.updateStatusAvailable(item.getItem_id());
                     if (isUpdate) {
                         itemsToUpdate.add(item);
                     }

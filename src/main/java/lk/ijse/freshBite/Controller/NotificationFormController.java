@@ -9,10 +9,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import lk.ijse.freshBite.Model.AddMenuModel;
-import lk.ijse.freshBite.Model.StockItemModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.NotificationBo;
+import lk.ijse.freshBite.bo.custom.impl.NotificationBoImpl;
 import lk.ijse.freshBite.dto.NotificationDto;
-import lk.ijse.freshBite.dto.StockItemDto;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -25,7 +25,7 @@ public class NotificationFormController {
     public GridPane gridCard;
     public Label lblNoNotification;
     private ObservableList<NotificationDto> oblist = FXCollections.observableArrayList();
-    private AddMenuModel itemModel = new AddMenuModel();
+   private NotificationBo notificationBo = (NotificationBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.NOTIFICATION);
     public void initialize(){
         notificationDisplay();
     }
@@ -70,7 +70,7 @@ public class NotificationFormController {
     private List<NotificationDto> getStockData()  {
         List<NotificationDto> dtos = new ArrayList<>();
         try {
-           dtos = itemModel.getOutOfStockData();
+           dtos = notificationBo.getOutOfStockData();
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

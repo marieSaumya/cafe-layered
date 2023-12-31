@@ -2,6 +2,7 @@ package lk.ijse.freshBite.dto;
 
 public class ForgotPassworddto {
     private  String userName;
+    private String pwd;
 
     public String getPwd() {
         return pwd;
@@ -11,7 +12,7 @@ public class ForgotPassworddto {
         this.pwd = pwd;
     }
 
-    private String pwd;
+
 
     public ForgotPassworddto(String userName, String pwd) {
         this.userName = userName;

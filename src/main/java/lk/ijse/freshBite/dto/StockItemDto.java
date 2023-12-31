@@ -10,28 +10,19 @@ public class StockItemDto {
     private String name;
     private  int quantity;
     private double price;
-    private String sup_id;
-    private  java.sql.Date date;
 
-    public StockItemDto(String stockId, String name, int quantity, double price, String sup_id, Date date) {
+    public StockItemDto(String stockId, String name, int quantity, double price) {
         this.stockId = stockId;
         this.name = name;
         this.quantity = quantity;
         this.price = price;
-        this.sup_id = sup_id;
-        this.date = date;
+
     }
 
     public StockItemDto() {
     }
 
-    public StockItemDto(String stockId, String name, int quantity, double price, String sup_id) {
-        this.stockId = stockId;
-        this.name = name;
-        this.quantity = quantity;
-        this.price = price;
-        this.sup_id = sup_id;
-    }
+
 
     public StockItemDto(String stockId, String name, int quantity) {
         this.stockId = stockId;
@@ -56,9 +47,6 @@ public class StockItemDto {
         this.price = price;
     }
 
-    public void setSup_id(String sup_id) {
-        this.sup_id = sup_id;
-    }
 
     @Override
     public String toString() {
@@ -66,8 +54,7 @@ public class StockItemDto {
                 "stockId='" + stockId + '\'' +
                 ", name='" + name + '\'' +
                 ", quantity=" + quantity +
-                ", price=" + price +
-                ", sup_id='" + sup_id + '\'' +
+                ", price=" + price + '\'' +
                 '}';
     }
 }

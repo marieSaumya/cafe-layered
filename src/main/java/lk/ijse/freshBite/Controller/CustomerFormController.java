@@ -12,10 +12,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import lk.ijse.freshBite.Model.CustomerDetailModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.CustomerBo;
+import lk.ijse.freshBite.bo.custom.impl.CustomerBoImpl;
 import lk.ijse.freshBite.dto.CustomerDetailDto;
 import lk.ijse.freshBite.dto.tm.CustomerTm;
-import lk.ijse.freshBite.dto.tm.StaffTm;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -53,7 +54,8 @@ public class CustomerFormController {
 
     @FXML
     private TableView<CustomerTm> tableCustomer;
-    private CustomerDetailModel model = new CustomerDetailModel();
+
+    private CustomerBo customerBo = (CustomerBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.CUSTOMER);
 
     public  void initialize(){
         setCellValueFactory();
@@ -63,7 +65,7 @@ public class CustomerFormController {
     private void loadAllCustomers() {
         ObservableList<CustomerTm> oblist = FXCollections.observableArrayList();
         try {
-            List<CustomerDetailDto> dtoList = model.loadCustomers();
+            List<CustomerDetailDto> dtoList = customerBo.loadCustomers();
            for (CustomerDetailDto dto : dtoList){
                oblist.add(new CustomerTm(dto.getCustId(), dto.getName(), dto.getAddress(), dto.getEmail(), dto.getTelephone(), dto.getGender(), dto.getMembership()));
            }

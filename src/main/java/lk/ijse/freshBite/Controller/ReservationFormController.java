@@ -12,12 +12,16 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import lk.ijse.freshBite.Model.CustomerDetailModel;
-import lk.ijse.freshBite.Model.ReservationModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.ReservationBo;
+import lk.ijse.freshBite.bo.custom.impl.ReservationBoImpl;
+import lk.ijse.freshBite.dao.custom.impl.CustomerDetailDaoImpl;
+import lk.ijse.freshBite.dao.custom.impl.ReservationDaoImpl;
 import lk.ijse.freshBite.dto.ReservationDto;
 import lk.ijse.freshBite.dto.tm.ReservationTm;
 import lk.ijse.freshBite.regex.RegexPattern;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
@@ -85,8 +89,9 @@ public class ReservationFormController {
 
     @FXML
     private TextField txtTime;
-    private CustomerDetailModel customerDetailModel = new CustomerDetailModel();
-    private ReservationModel model = new ReservationModel();
+    private CustomerDetailDaoImpl customerDetailDaoImpl = new CustomerDetailDaoImpl();
+    private ReservationBo reservationBo = (ReservationBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.RESERVATION);
+
     public void initialize(){
         setCellValueFactory();
          generateNextId();
@@ -126,13 +131,13 @@ public class ReservationFormController {
     private void loadAllReservations() {
         ObservableList<ReservationTm> oblist = FXCollections.observableArrayList();
         try {
-            List<ReservationDto> dtoList = model.getAllReservations();
+            List<ReservationDto> dtoList = reservationBo.getAllReservations();
             lblDate.setText("");
             for (ReservationDto dto : dtoList){
                 JFXButton button = createRemoveButton();
                 setRemoveBtnOnAction(button);
                 CheckBox checkBox = new CheckBox();
-                boolean isComplete = model.checkComplete(dto.getId());
+                boolean isComplete = reservationBo.checkComplete(dto.getId());
                 checkBox.setSelected(isComplete);
                 // Set a listener for the CheckBox
                 checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
@@ -187,7 +192,7 @@ public class ReservationFormController {
     private void loadCustId() {
         ObservableList<String> custIdList = FXCollections.observableArrayList();
         try {
-            List<String> list = customerDetailModel.loadCustomerId();
+            List<String> list = reservationBo.loadCustomerId();
             custIdList.addAll(list);
             CombCustId.setItems(custIdList);
         } catch (SQLException e) {
@@ -214,7 +219,7 @@ public class ReservationFormController {
             String custId = CombCustId.getValue();
             String name = null;
             try {
-                name = customerDetailModel.getName(custId);
+                name = customerDetailDaoImpl.getName(custId);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -222,7 +227,7 @@ public class ReservationFormController {
             int size = Integer.parseInt(txtSize.getText());
             var dto = new ReservationDto(id,date, time, tableNo, custId, telephone, size,name);
             try {
-                boolean isSaved =model.saveReservation(dto);
+                boolean isSaved =reservationBo.saveReservation(dto);
                 if (isSaved){
                     new Alert(Alert.AlertType.INFORMATION,"Reservation saved").show();
                     loadAllReservations();
@@ -230,6 +235,8 @@ public class ReservationFormController {
                 }
             } catch (SQLException e) {
                 new Alert(Alert.AlertType.ERROR,e.getMessage()).show();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
 
 
@@ -248,7 +255,7 @@ public class ReservationFormController {
             String custId = CombCustId.getValue();
             String name = null;
             try {
-                name = customerDetailModel.getName(custId);
+                name = customerDetailDaoImpl.getName(custId);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -256,7 +263,7 @@ public class ReservationFormController {
             int size = Integer.parseInt(txtSize.getText());
             var dto = new ReservationDto(id,date, time, tableNo, custId, telephone, size,name);
             try {
-                boolean isUpdated =model.updateReservation(dto);
+                boolean isUpdated =reservationBo.updateReservation(dto);
                 if (isUpdated){
                     new Alert(Alert.AlertType.INFORMATION,"Reservation Update").show();
                     loadAllReservations();
@@ -275,12 +282,12 @@ public class ReservationFormController {
         lblDate.setText(String.valueOf(date));
         ObservableList<ReservationTm> observableList = FXCollections.observableArrayList();
         try {
-            List<ReservationDto> dtoList = model.getAllReservationListOnDate(date);
+            List<ReservationDto> dtoList = reservationBo.getAllReservationListOnDate(date);
             for (ReservationDto dto : dtoList){
                 JFXButton button = createRemoveButton();
                 setRemoveBtnOnAction(button);
                 CheckBox checkBox = new CheckBox();
-                boolean isComplete = model.checkComplete(dto.getId());
+                boolean isComplete = reservationBo.checkComplete(dto.getId());
                 checkBox.setSelected(isComplete);
                 // Set a listener for the CheckBox
                 checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
@@ -315,12 +322,12 @@ public class ReservationFormController {
         ObservableList<ReservationTm> observableList = FXCollections.observableArrayList();
         lblDate.setText(String.valueOf(LocalDate.now()));
         try {
-            List<ReservationDto> dtoList = model.getAllReservationListtodayDate();
+            List<ReservationDto> dtoList = reservationBo.getAllReservationListtodayDate();
             for (ReservationDto dto : dtoList){
                 JFXButton button = createRemoveButton();
                 setRemoveBtnOnAction(button);
                 CheckBox checkBox = new CheckBox();
-                boolean isComplete = model.checkComplete(dto.getId());
+                boolean isComplete = reservationBo.checkComplete(dto.getId());
                 checkBox.setSelected(isComplete);
 
                 // Set a listener for the CheckBox
@@ -356,7 +363,7 @@ public class ReservationFormController {
 
     private void unmarkReservationAsCompleted(String id) {
         try {
-            boolean isUpdated = model.unCompleteReservation(id);
+            boolean isUpdated = reservationBo.unCompleteReservation(id);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -365,7 +372,7 @@ public class ReservationFormController {
 
     private void markReservationAsCompleted(String id) {
         try {
-            boolean isUpdated = model.completeReservation(id);
+            boolean isUpdated = reservationBo.completeReservation(id);
             if (isUpdated){
                 new Alert(Alert.AlertType.INFORMATION,"reservation Is Completed").show();
             }
@@ -378,7 +385,7 @@ public class ReservationFormController {
     public void comboIdOnAction(ActionEvent actionEvent) {
         String custId = CombCustId.getValue();
         try {
-            String telephone = customerDetailModel.getTelephone(custId);
+            String telephone = customerDetailDaoImpl.getTelephone(custId);
             if (telephone!= null){
                 txtTelephone.setText(telephone);
             }
@@ -405,7 +412,7 @@ public class ReservationFormController {
     }
     public void generateNextId(){
         try {
-            String nextId = model.generateNextId();
+            String nextId = reservationBo.generateNextId();
             txtReservationId.setText(nextId);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -422,7 +429,7 @@ public class ReservationFormController {
                     ReservationTm selectedReservation = tableReservation.getItems().get(focusedIndex);
                     String reservationId = selectedReservation.getReservationId();
                     try {
-                        boolean deleted = model.deleteReservation(reservationId);
+                        boolean deleted = reservationBo.deleteReservation(reservationId);
                         if (deleted) {
                             new Alert(Alert.AlertType.INFORMATION, "Reservation Deleted").show();
                             loadAllReservations();

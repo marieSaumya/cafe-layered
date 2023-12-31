@@ -13,9 +13,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import lk.ijse.freshBite.Model.LoginModel;
-import lk.ijse.freshBite.dto.LoginDto;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.LoginBo;
+import lk.ijse.freshBite.bo.custom.impl.LoginBoImpl;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -40,7 +40,7 @@ public class LoginFormController {
 
     @FXML
     private TextField txtUserName;
-    private LoginModel model = new LoginModel();
+    private LoginBo loginBo = (LoginBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.LOGIN);
 
     @FXML
     void btnForgotPwdONAction(ActionEvent event) throws IOException {
@@ -94,7 +94,7 @@ public class LoginFormController {
         System.out.println(userName);
         System.out.println(pwd);
         try {
-            var dto =  model.CheckUserNamePassword ();
+            var dto =  loginBo.CheckUserNamePassword ();
             System.out.println(dto);
             if(dto.getUserName().equals(userName) && dto.getPwd().equals(pwd) || dto.getPwd().equals(pwd1)){
                 AnchorPane anchorPane = FXMLLoader.load(getClass().getResource("/view/Dashboard.fxml"));

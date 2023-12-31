@@ -8,7 +8,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -19,16 +18,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
-import lk.ijse.freshBite.Model.CustomerDetailModel;
-import lk.ijse.freshBite.Model.OrderModel;
-import lk.ijse.freshBite.Model.ReservationModel;
+import lk.ijse.freshBite.bo.BoFactory;
+import lk.ijse.freshBite.bo.custom.DashboardBo;
+import lk.ijse.freshBite.bo.custom.impl.DashboardBoImpl;
 import lk.ijse.freshBite.dto.IncomeDto;
 import lk.ijse.freshBite.dto.ReservationDto;
 import lk.ijse.freshBite.dto.tm.DashbordTm;
@@ -117,9 +113,8 @@ public class DashboardController  implements Initializable {
 
     @FXML
     private ImageView imgStock;
-    private OrderModel orderModel = new OrderModel();
-    private CustomerDetailModel customerDetailModel = new CustomerDetailModel();
-    private ReservationModel reservationModel = new ReservationModel();
+    private DashboardBo dashboardBo = (DashboardBo) BoFactory.getBoFactory().getBo(BoFactory.BoTypes.DASHBOARD);
+
 
 
     @Override
@@ -166,7 +161,7 @@ public class DashboardController  implements Initializable {
 
     private void loadIncome() {
         try {
-            List<IncomeDto> list = orderModel.getIncomeDetails();
+            List<IncomeDto> list = dashboardBo.getIncomeDetails();
             if (!list.isEmpty()){
                 setupLineChart(list);
             }
@@ -200,7 +195,7 @@ public class DashboardController  implements Initializable {
     private void loadTableReservations() {
         ObservableList<DashbordTm> obList = FXCollections.observableArrayList();
         try {
-            List<ReservationDto> dtoList = reservationModel.getTodayReservations();
+            List<ReservationDto> dtoList = dashboardBo.getTodayReservations();
             System.out.println(dtoList);
             for (ReservationDto dto :dtoList){
                 obList.add(new DashbordTm(dto.getTime(), dto.getTableNo(), dto.getCustId()));
@@ -215,7 +210,7 @@ public class DashboardController  implements Initializable {
 
     private void setCustomers() {
         try {
-            int AvgCustomers = customerDetailModel.getCustomerCount();
+            int AvgCustomers = dashboardBo.getCustomerCount();
             if (AvgCustomers!=(-1)){
                 lblCustomer.setText(String.valueOf(AvgCustomers));
             }
@@ -226,7 +221,7 @@ public class DashboardController  implements Initializable {
 
     private void setRevenue() {
         try {
-            double price = orderModel.getTotalPriceOfToday();
+            double price = dashboardBo.getTotalPriceOfToday();
             if (price!=(-1)){
                 lblRevenue.setText(String.valueOf(price));
             }
@@ -238,7 +233,7 @@ public class DashboardController  implements Initializable {
 
     private void setOrder() {
         try {
-            int totalOrders = orderModel.getTotalOrderCount();
+            int totalOrders = dashboardBo.getTotalOrderCount();
             if (totalOrders!=(-1)){
                 lblorders.setText(String.valueOf(totalOrders));
             }
